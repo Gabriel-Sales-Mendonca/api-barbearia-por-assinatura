@@ -1,38 +1,33 @@
 package com.gabrielsales.AEliteBarberShop.entities;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 @Entity
 @Table(name = "tb_user")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String login;
     private String name;
     private String lastname;
-    private String role;
+    private UserRole role;
     private Integer desiredPlan;
     private List<String> proofOfPayments = new ArrayList<>();
 
-    public User(String name, String lastname, String role) {
-        Long id = this.generateId();
-        setId(id);
-
+    public User(String login, String name, String lastname, UserRole role) {
+        this.login = login;
         this.name = name;
         this.lastname = lastname;
         this.role = role;
-    }
-
-    private Long generateId() {
-        Random random = new Random();
-
-        int number = random.nextInt(100);
-        return (long) number;
     }
 
     public Long getId() {
@@ -43,6 +38,14 @@ public class User {
         this.id = id;
     }
 
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+    
     public String getName() {
         return name;
     }
@@ -59,7 +62,7 @@ public class User {
         this.lastname = lastname;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
@@ -79,4 +82,42 @@ public class User {
         this.proofOfPayments = proofOfPayments;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.role == UserRole.ADMIN) return List.of(
+                new SimpleGrantedAuthority("ROLE_ADMIN"),
+                new SimpleGrantedAuthority("ROLE_USER")
+        );
+        else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return this.login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
 }
