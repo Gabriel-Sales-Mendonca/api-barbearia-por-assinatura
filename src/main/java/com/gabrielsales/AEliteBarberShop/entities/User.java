@@ -17,14 +17,19 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String login;
+    private String password;
     private String name;
     private String lastname;
     private UserRole role;
     private Integer desiredPlan;
     private List<String> proofOfPayments = new ArrayList<>();
 
-    public User(String login, String name, String lastname, UserRole role) {
+    public User() {
+    }
+
+    public User(String login, String password, String name, String lastname, UserRole role) {
         this.login = login;
+        this.password = password;
         this.name = name;
         this.lastname = lastname;
         this.role = role;
@@ -93,7 +98,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return this.password;
     }
 
     @Override
