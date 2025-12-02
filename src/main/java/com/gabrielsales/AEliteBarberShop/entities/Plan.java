@@ -1,6 +1,9 @@
 package com.gabrielsales.AEliteBarberShop.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "tb_plan")
@@ -9,8 +12,16 @@ public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Nome não informado")
+    @Size(max = 40, message = "O nome para o Plano é muito grande")
     private String name;
+
+    @NotBlank(message = "Descrição não informada")
     private String description;
+
+    @NotBlank(message = "Preço não informado")
+    @Min(value = 0, message = "O preço não pode ser abaixo de 0")
     private Double price;
 
     public Plan() {}

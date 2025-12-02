@@ -3,7 +3,9 @@ package com.gabrielsales.AEliteBarberShop.mappers;
 import com.gabrielsales.AEliteBarberShop.dtos.PlanRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.PlanResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.Plan;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PlanMapper {
 
     public Plan toEntity(PlanRequestDTO planRequestDTO) {
