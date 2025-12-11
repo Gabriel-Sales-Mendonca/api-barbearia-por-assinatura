@@ -5,6 +5,7 @@ import com.gabrielsales.AEliteBarberShop.dtos.PlanResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.Plan;
 import com.gabrielsales.AEliteBarberShop.mappers.PlanMapper;
 import com.gabrielsales.AEliteBarberShop.services.PlanService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class PlanController {
     }
 
     @PostMapping
-    public ResponseEntity<PlanResponseDTO> create(@RequestBody PlanRequestDTO planRequestDTO) {
+    public ResponseEntity<PlanResponseDTO> create(@RequestBody @Valid PlanRequestDTO planRequestDTO) {
         Plan newPlan = this.planMapper.toEntity(planRequestDTO);
         Plan planCreated = this.planService.create(newPlan);
         PlanResponseDTO planResponseDTO = this.planMapper.toDTO(planCreated);

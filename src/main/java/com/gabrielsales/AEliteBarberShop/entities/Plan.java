@@ -1,9 +1,7 @@
 package com.gabrielsales.AEliteBarberShop.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "tb_plan")
@@ -20,8 +18,8 @@ public class Plan {
     @NotBlank(message = "Descrição não informada")
     private String description;
 
-    @NotBlank(message = "Preço não informado")
-    @Min(value = 0, message = "O preço não pode ser abaixo de 0")
+    @NotNull(message = "Preço não informado")
+    @Positive(message = "O preço não pode ser abaixo de 0")
     private Double price;
 
     public Plan() {}

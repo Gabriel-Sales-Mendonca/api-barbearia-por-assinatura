@@ -14,6 +14,7 @@ public class PlanService {
     }
 
     public Plan create(Plan plan) {
+        if (plan.getName().equals("teste")) throw new RuntimeException("Erro de teste");
         return this.planRepository.save(plan);
     }
 
