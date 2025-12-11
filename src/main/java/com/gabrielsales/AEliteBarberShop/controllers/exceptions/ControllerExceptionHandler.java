@@ -4,6 +4,7 @@ import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundExc
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -21,6 +22,32 @@ public class ControllerExceptionHandler {
                 status.value(),
                 "Resource not found",
                 e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<StandardError> methodArgumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StringBuilder errorMessage = new StringBuilder();
+        String separator = "; ";
+
+        for (int i = 0; i < e.getBindingResult().getFieldErrors().size(); i++) {
+            String message = e.getBindingResult().getFieldErrors().get(i).getDefaultMessage();
+            errorMessage.append(message);
+
+            if (i < e.getBindingResult().getFieldErrors().size() - 1) {
+                errorMessage.append(separator);
+            }
+        }
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Argument not valid",
+                errorMessage.toString(),
                 request.getRequestURI()
         );
         return ResponseEntity.status(status).body(error);
