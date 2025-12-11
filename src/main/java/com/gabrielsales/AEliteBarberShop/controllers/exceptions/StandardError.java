@@ -2,7 +2,7 @@ package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 
 import java.time.Instant;
 
-public class StardardError {
+public class StandardError {
 
     private Instant timestamp;
     private Integer status;
@@ -10,7 +10,7 @@ public class StardardError {
     private String message;
     private String path;
 
-    public StardardError(Instant timestamp, Integer status, String errorName, String message, String path) {
+    public StandardError(Instant timestamp, Integer status, String errorName, String message, String path) {
         this.timestamp = timestamp;
         this.status = status;
         this.errorName = errorName;
