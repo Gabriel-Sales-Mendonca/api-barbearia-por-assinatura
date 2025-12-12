@@ -49,6 +49,20 @@ public class AuthenticationController {
                 .build();
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity logout() {
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .secure(true)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Logout realizado com sucesso!");
+    }
+
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterDTO data) {
         if (this.userRepository.findByLogin(data.login()) != null) {
