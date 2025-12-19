@@ -49,4 +49,9 @@ public class PlanService {
 
         return this.planRepository.save(planDB);
     }
+
+    public void delete(Long id) {
+        Plan planDB = this.findById(id);
+        this.planRepository.deleteById(id);
+    }
 }
