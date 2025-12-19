@@ -53,4 +53,16 @@ public class PlanController {
 
         return ResponseEntity.status(HttpStatus.OK).body(planResponseDTO);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PlanResponseDTO> update(
+            @PathVariable Long id,
+            @RequestBody @Valid PlanRequestDTO planRequestDTO
+    ) {
+        Plan requestPlan = this.planMapper.toEntity(planRequestDTO);
+        Plan updatedPlan = this.planService.update(id, requestPlan);
+        PlanResponseDTO planResponseDTO = this.planMapper.toDTO(updatedPlan);
+
+        return ResponseEntity.status(HttpStatus.OK).body(planResponseDTO);
+    }
 }

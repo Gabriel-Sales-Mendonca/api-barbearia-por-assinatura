@@ -39,4 +39,14 @@ public class PlanService {
         return this.planRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
+    public Plan update(Long id, Plan plan) {
+        Plan planDB = this.findById(id);
+
+        planDB.setName(plan.getName());
+        planDB.setDescription(plan.getDescription());
+        planDB.setPrice(plan.getPrice());
+
+        return this.planRepository.save(planDB);
+    }
 }
