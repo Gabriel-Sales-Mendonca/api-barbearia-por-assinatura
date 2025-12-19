@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 
+import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,20 @@ public class ControllerExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<StandardError> resourceAlreadyExists(ResourceAlreadyExistsException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Conflict",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
     }
 
 }
