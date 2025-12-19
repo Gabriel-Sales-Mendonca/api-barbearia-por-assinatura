@@ -2,6 +2,7 @@ package com.gabrielsales.AEliteBarberShop.services;
 
 import com.gabrielsales.AEliteBarberShop.entities.Plan;
 import com.gabrielsales.AEliteBarberShop.repositories.PlanRepository;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,5 +33,10 @@ public class PlanService {
         }
 
         return this.planRepository.findAll(pageable);
+    }
+
+    public Plan findById(Long id) {
+        return this.planRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 }

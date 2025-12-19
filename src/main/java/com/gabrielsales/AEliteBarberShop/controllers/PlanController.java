@@ -45,4 +45,12 @@ public class PlanController {
 
         return ResponseEntity.status(HttpStatus.OK).body(plansDTO);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PlanResponseDTO> findById(@PathVariable Long id) {
+        Plan plan = this.planService.findById(id);
+        PlanResponseDTO planResponseDTO = this.planMapper.toDTO(plan);
+
+        return ResponseEntity.status(HttpStatus.OK).body(planResponseDTO);
+    }
 }

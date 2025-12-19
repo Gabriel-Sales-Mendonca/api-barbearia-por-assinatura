@@ -3,6 +3,7 @@ package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,7 +25,7 @@ public class ControllerExceptionHandler {
                 e.getMessage(),
                 request.getRequestURI()
         );
-        return ResponseEntity.status(status).body(error);
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
