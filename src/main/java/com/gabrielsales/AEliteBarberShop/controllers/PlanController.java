@@ -6,12 +6,14 @@ import com.gabrielsales.AEliteBarberShop.entities.Plan;
 import com.gabrielsales.AEliteBarberShop.mappers.PlanMapper;
 import com.gabrielsales.AEliteBarberShop.services.PlanService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/plans")
@@ -32,5 +34,15 @@ public class PlanController {
         PlanResponseDTO planResponseDTO = this.planMapper.toDTO(planCreated);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(planResponseDTO);
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<PlanResponseDTO>> findAll(@PageableDefault(size = 10) Pageable pageable) {
+        Page<Plan> plans = this.planService.findAll(pageable);
+
+        Page<PlanResponseDTO> plansDTO = plans
+                .map(plan -> this.planMapper.toDTO(plan));
+
+        return ResponseEntity.status(HttpStatus.OK).body(plansDTO);
     }
 }
