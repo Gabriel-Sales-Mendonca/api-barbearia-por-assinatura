@@ -3,6 +3,7 @@ package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,20 @@ public class ControllerExceptionHandler {
                 Instant.now(),
                 status.value(),
                 "Conflict",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<StandardError> validation(ValidationException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Unauthorized",
                 e.getMessage(),
                 request.getRequestURI()
         );

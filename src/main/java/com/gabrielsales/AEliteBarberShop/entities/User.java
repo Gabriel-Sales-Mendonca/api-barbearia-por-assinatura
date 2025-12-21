@@ -50,6 +50,10 @@ public class User implements UserDetails {
     public void setLogin(String login) {
         this.login = login;
     }
+
+    public void setPassword(String passwordEncoded) {
+        this.password = passwordEncoded;
+    }
     
     public String getName() {
         return name;

@@ -1,12 +1,15 @@
 package com.gabrielsales.AEliteBarberShop.services;
 
 import com.gabrielsales.AEliteBarberShop.dtos.UserUpdateDTO;
+import com.gabrielsales.AEliteBarberShop.dtos.UserUpdatePasswordDTO;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.ValidationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,5 +43,18 @@ public class UserService {
         user.setLastname(data.lastname());
 
         return this.userRepository.save(user);
+    }
+
+    public void updatePassword(UserUpdatePasswordDTO data) {
+        User user = this.getTokenUser();
+
+        if (!new BCryptPasswordEncoder().matches(data.oldPassword(), user.getPassword())) {
+            throw new ValidationException("Senha antiga incorreta");
+        }
+
+        String passwordEncoded = new BCryptPasswordEncoder().encode(data.newPassword());
+        user.setPassword(passwordEncoded);
+
+        this.userRepository.save(user);
     }
 }
