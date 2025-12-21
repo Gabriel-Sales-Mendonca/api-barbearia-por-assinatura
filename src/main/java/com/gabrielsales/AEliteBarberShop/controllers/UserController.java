@@ -27,16 +27,13 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<UserResponseDTO> findByUsername() {
+    public ResponseEntity<UserResponseDTO> findUser() {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
 
         UserDetails user = (UserDetails) authentication.getPrincipal();
-        String username = user.getUsername();
-
-        User userDB = (User) authenticationService.loadUserByUsername(username);
-        UserResponseDTO userResponseDTO = this.userMapper.toDTO(userDB);
+        UserResponseDTO userResponseDTO = this.userMapper.toDTO((User) user);
 
         return ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
     }
