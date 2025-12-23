@@ -24,6 +24,9 @@ public class User implements UserDetails {
     private Integer desiredPlan;
     private List<String> proofOfPayments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Order> orders = new ArrayList<>();
+
     public User() {
     }
 

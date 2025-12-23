@@ -3,6 +3,9 @@ package com.gabrielsales.AEliteBarberShop.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tb_plan")
 public class Plan {
@@ -21,6 +24,9 @@ public class Plan {
     @NotNull(message = "Preço não informado")
     @Positive(message = "O preço não pode ser abaixo de 0")
     private Double price;
+
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
+    private List<Order> orders = new ArrayList<>();
 
     public Plan() {}
 
