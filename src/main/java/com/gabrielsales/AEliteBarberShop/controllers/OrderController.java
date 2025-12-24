@@ -7,10 +7,9 @@ import com.gabrielsales.AEliteBarberShop.mappers.OrderMapper;
 import com.gabrielsales.AEliteBarberShop.services.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -30,5 +29,15 @@ public class OrderController {
         OrderResponseDTO orderReponseDTO = this.orderMapper.toDTO(createdOrder);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(orderReponseDTO);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponseDTO>> findAll() {
+        List<Order> orders = this.orderService.findAll();
+        List<OrderResponseDTO> ordersResponseDTO = orders.stream()
+                .map(order -> this.orderMapper.toDTO(order))
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
     }
 }

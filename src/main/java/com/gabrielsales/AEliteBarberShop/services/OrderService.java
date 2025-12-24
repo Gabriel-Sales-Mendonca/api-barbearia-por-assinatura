@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -36,5 +37,10 @@ public class OrderService {
         );
 
         return this.orderRepository.save(order);
+    }
+
+    public List<Order> findAll() {
+        User user = this.userService.getTokenUser();
+        return this.orderRepository.findAllByUserId(user.getId());
     }
 }
