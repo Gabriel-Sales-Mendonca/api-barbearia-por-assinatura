@@ -5,6 +5,9 @@ import com.gabrielsales.AEliteBarberShop.entities.OrderStatus;
 import com.gabrielsales.AEliteBarberShop.entities.Plan;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,8 +42,16 @@ public class OrderService {
         return this.orderRepository.save(order);
     }
 
-    public List<Order> findAll() {
+    public Page<Order> findAll(Pageable pageable) {
+        if (pageable.getPageSize() > 50) {
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    50,
+                    pageable.getSort()
+            );
+        }
+
         User user = this.userService.getTokenUser();
-        return this.orderRepository.findAllByUserId(user.getId());
+        return this.orderRepository.findAllByUserId(user.getId(), pageable);
     }
 }
