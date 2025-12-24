@@ -26,11 +26,6 @@ public class Order {
     public Order() {
     }
 
-    public Order(Double value, LocalDate date) {
-        this.value = value;
-        this.date = date;
-    }
-
     public Order(Double value, LocalDate date, OrderStatus orderStatus, User user, Plan plan) {
         this.value = value;
         this.date = date;
