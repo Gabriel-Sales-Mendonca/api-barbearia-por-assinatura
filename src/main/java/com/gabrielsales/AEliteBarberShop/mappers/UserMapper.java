@@ -9,7 +9,6 @@ public class UserMapper {
 
     public UserResponseDTO toDTO(User user) {
         return new UserResponseDTO(
-                user.getId(),
                 user.getLogin(),
                 user.getName(),
                 user.getLastname(),
