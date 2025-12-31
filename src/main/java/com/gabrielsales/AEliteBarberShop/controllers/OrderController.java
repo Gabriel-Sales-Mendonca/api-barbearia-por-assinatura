@@ -43,6 +43,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
     }
 
+    @GetMapping("/to-approve")
+    public ResponseEntity<Page<OrderResponseDTO>> findAllToApprove(@PageableDefault(size = 10) Pageable pageable) {
+        Page<Order> orders = this.orderService.findAllToApprove(pageable);
+        Page<OrderResponseDTO> ordersResponseDTO = orders.map(order -> this.orderMapper.toDTO(order));
+
+        return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
+    }
+
     @PostMapping("/proof-of-payment/{id}")
     public ResponseEntity<String> receiveProofOfPayment(
             @PathVariable Long id,

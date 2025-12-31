@@ -49,14 +49,20 @@ public class OrderService {
         return this.orderRepository.save(order);
     }
 
-    public Page<Order> findAll(Pageable pageable) {
+    private Pageable getValidPageable(Pageable pageable) {
         if (pageable.getPageSize() > 50) {
-            pageable = PageRequest.of(
+            return PageRequest.of(
                     pageable.getPageNumber(),
                     50,
                     pageable.getSort()
             );
         }
+
+        return pageable;
+    }
+
+    public Page<Order> findAll(Pageable pageable) {
+        pageable = this.getValidPageable(pageable);
 
         User user = this.userService.getTokenUser();
         return this.orderRepository.findAllByUserId(user.getId(), pageable);
@@ -73,6 +79,12 @@ public class OrderService {
         } else {
             throw new ResourceNotFoundException(id);
         }
+    }
+
+    public Page<Order> findAllToApprove(Pageable pageable) {
+        pageable = this.getValidPageable(pageable);
+
+        return this.orderRepository.findAllByOrderStatus(OrderStatus.AWAITING_PAYMENT_APPROVAL, pageable);
     }
 
     public void receiveProofOfPayment(Long orderId, MultipartFile file) {
