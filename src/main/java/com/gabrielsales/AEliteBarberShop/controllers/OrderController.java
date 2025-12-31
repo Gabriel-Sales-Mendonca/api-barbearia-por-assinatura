@@ -11,6 +11,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -41,4 +42,15 @@ public class OrderController {
 
         return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
     }
+
+    @PostMapping("/proof-of-payment/{id}")
+    public ResponseEntity<String> receiveProofOfPayment(
+            @PathVariable Long id,
+            @RequestParam MultipartFile file
+    ) {
+        this.orderService.receiveProofOfPayment(id, file);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Upload da imagem feito com sucesso");
+    }
+
 }

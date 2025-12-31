@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 
+import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -78,6 +79,20 @@ public class ControllerExceptionHandler {
                 Instant.now(),
                 status.value(),
                 "Unauthorized",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
+    }
+
+    @ExceptionHandler(InvalidResourceException.class)
+    public ResponseEntity<StandardError> invalidResource(InvalidResourceException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Argument not valid",
                 e.getMessage(),
                 request.getRequestURI()
         );

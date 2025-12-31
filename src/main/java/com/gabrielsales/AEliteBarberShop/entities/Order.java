@@ -14,6 +14,7 @@ public class Order {
     private Double value;
     private LocalDate date;
     private OrderStatus orderStatus;
+    private String proofOfPaymentSecureUrl;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -76,5 +77,13 @@ public class Order {
 
     public void setPlan(Plan plan) {
         this.plan = plan;
+    }
+
+    public String getProofOfPaymentSecureUrl() {
+        return proofOfPaymentSecureUrl;
+    }
+
+    public void setProofOfPaymentSecureUrl(String proofOfPaymentSecureUrl) {
+        this.proofOfPaymentSecureUrl = proofOfPaymentSecureUrl;
     }
 }
