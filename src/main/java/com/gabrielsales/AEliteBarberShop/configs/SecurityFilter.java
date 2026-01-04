@@ -29,6 +29,8 @@ public class SecurityFilter extends OncePerRequestFilter {
     // Esse método é chamado automaticamente pelo Spring Security, quando a linha de addFilterBefore que possui uma classe que extende OncePerRequestFilter é executada
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("DEBUG: Requisição recebida para URI: " + request.getRequestURI());
+
         var token = this.recoverToken(request);
         if (token != null) {
             var subject = tokenService.validateToken(token);
