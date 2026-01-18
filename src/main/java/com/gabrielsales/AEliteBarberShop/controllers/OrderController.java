@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers;
 
+import com.gabrielsales.AEliteBarberShop.dtos.ApprovePaymentRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.OrderRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.OrderResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.Order;
@@ -59,6 +60,12 @@ public class OrderController {
         this.orderService.receiveProofOfPayment(id, file);
 
         return ResponseEntity.status(HttpStatus.OK).body("Upload da imagem feito com sucesso");
+    }
+
+    @PatchMapping("/approve-or-reject")
+    public ResponseEntity<String> approveOrRejectPayment(@RequestBody ApprovePaymentRequestDTO requestDTO) {
+        this.orderService.approveOrRejectPayment(requestDTO.id(), requestDTO.approve());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

@@ -2,10 +2,7 @@ package com.gabrielsales.AEliteBarberShop.services;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.gabrielsales.AEliteBarberShop.entities.Order;
-import com.gabrielsales.AEliteBarberShop.entities.OrderStatus;
-import com.gabrielsales.AEliteBarberShop.entities.Plan;
-import com.gabrielsales.AEliteBarberShop.entities.User;
+import com.gabrielsales.AEliteBarberShop.entities.*;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
@@ -14,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,11 +25,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final PlanService planService;
+    private final SignatureService signatureService;
 
-    public OrderService(OrderRepository orderRepository, UserService userService, PlanService planService) {
+    public OrderService(OrderRepository orderRepository, UserService userService, PlanService planService, SignatureService signatureService) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.planService = planService;
+        this.signatureService = signatureService;
     }
 
     public Order create(Long planId) {
@@ -74,7 +74,8 @@ public class OrderService {
         Order order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
 
-        if (order.getUser().getId().equals(user.getId())) {
+        if (order.getUser().getId().equals(user.getId()) ||
+                user.getRole().equals(UserRole.ADMIN)) {
             return order;
         } else {
             throw new ResourceNotFoundException(id);
@@ -111,6 +112,27 @@ public class OrderService {
         } catch (IOException e) {
             System.out.println("Erro ao fazer o upload do arquivo");
             throw new RuntimeException("Erro ao fazer o upload do arquivo");
+        }
+    }
+
+    @Transactional
+    public void approveOrRejectPayment(Long orderId, Boolean approve) {
+        Order order = this.findById(orderId);
+        if (!order.getOrderStatus().equals(OrderStatus.AWAITING_PAYMENT_APPROVAL)) {
+            throw new InvalidResourceException("Pedido não está na etapa de: " + OrderStatus.AWAITING_PAYMENT_APPROVAL.getOrderStatus());
+        }
+
+        LocalDate dateNow = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+        if (approve.equals(true)) {
+            order.setOrderStatus(OrderStatus.PAYMENT_APPROVED);
+            order.setDate(dateNow);
+            this.orderRepository.save(order);
+
+            this.signatureService.create(dateNow, order.getPlan(), order.getUser());
+        } else {
+            order.setOrderStatus(OrderStatus.PAYMENT_REJECTED);
+            order.setDate(dateNow);
+            this.orderRepository.save(order);
         }
     }
 
