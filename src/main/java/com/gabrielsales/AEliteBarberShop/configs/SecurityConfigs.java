@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.configs;
 
+import com.gabrielsales.AEliteBarberShop.entities.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -40,6 +41,7 @@ public class SecurityConfigs {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/plans").permitAll()
                         .requestMatchers( "/error").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/orders/approve-or-reject").hasRole(UserRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
