@@ -7,6 +7,8 @@ import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final PlanService planService;
@@ -103,6 +106,7 @@ public class OrderService {
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+            log.info("Upload de arquivo feito com sucesso para o pedido: {}", orderId);
             String secureUrl = uploadResult.get("secure_url").toString().split("authenticated")[1];
 
             order.setProofOfPaymentSecureUrl(secureUrl);
@@ -110,7 +114,7 @@ public class OrderService {
 
             this.orderRepository.save(order);
         } catch (IOException e) {
-            System.out.println("Erro ao fazer o upload do arquivo");
+            log.error("Erro ao fazer o upload do arquivo para o pedido: {}", orderId, e);
             throw new RuntimeException("Erro ao fazer o upload do arquivo");
         }
     }
@@ -119,6 +123,7 @@ public class OrderService {
     public void approveOrRejectPayment(Long orderId, Boolean approve) {
         Order order = this.findById(orderId);
         if (!order.getOrderStatus().equals(OrderStatus.AWAITING_PAYMENT_APPROVAL)) {
+            log.warn("Pedido: {} não está na etapa de: {}", orderId, OrderStatus.AWAITING_PAYMENT_APPROVAL.getOrderStatus());
             throw new InvalidResourceException("Pedido não está na etapa de: " + OrderStatus.AWAITING_PAYMENT_APPROVAL.getOrderStatus());
         }
 
@@ -129,6 +134,7 @@ public class OrderService {
             this.orderRepository.save(order);
 
             this.signatureService.create(dateNow, order.getPlan(), order.getUser());
+            log.info("Pagamento aprovado para o pedido: {}", orderId);
         } else {
             order.setOrderStatus(OrderStatus.PAYMENT_REJECTED);
             order.setDate(dateNow);
