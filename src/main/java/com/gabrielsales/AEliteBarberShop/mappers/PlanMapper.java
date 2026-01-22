@@ -18,6 +18,7 @@ public class PlanMapper {
 
     public PlanResponseDTO toDTO(Plan plan) {
         return new PlanResponseDTO(
+                plan.getId(),
                 plan.getName(),
                 plan.getDescription(),
                 plan.getPrice()
