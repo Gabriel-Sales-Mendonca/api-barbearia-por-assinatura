@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.gabrielsales.AEliteBarberShop.entities.*;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
@@ -40,6 +41,15 @@ public class OrderService {
     public Order create(Long planId) {
         User user = this.userService.getTokenUser();
         Plan plan = this.planService.findById(planId);
+
+        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT);
+        if (existingOrder != null) {
+            log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status aguardando comprovante de pagamento");
+            throw new ResourceAlreadyExistsException(
+                    "Já existe uma pedido de assinatura com o status: " +
+                    OrderStatus.AWAITING_PROOF_OF_PAYMENT.getOrderStatus() +
+                    ", cancele seus pedidos de assinatura que estão aguardando comprovante de pagamento para criar uma nova assinatura");
+        }
 
         Order order = new Order(
                 plan.getPrice(),
@@ -91,8 +101,9 @@ public class OrderService {
         return this.orderRepository.findAllByOrderStatus(OrderStatus.AWAITING_PAYMENT_APPROVAL, pageable);
     }
 
-    public void receiveProofOfPayment(Long orderId, MultipartFile file) {
-        Order order = this.findById(orderId);
+    public void receiveProofOfPayment(MultipartFile file) {
+        User user = this.userService.getTokenUser();
+        Order order = this.orderRepository.findAllByUserIdAndOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT);
 
         if (file.isEmpty()) throw new InvalidResourceException("Arquivo enviado está vazio");
 
@@ -106,7 +117,7 @@ public class OrderService {
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
-            log.info("Upload de arquivo feito com sucesso para o pedido: {}", orderId);
+            log.info("Upload de arquivo feito com sucesso para o pedido: {}", order.getId());
             String secureUrl = uploadResult.get("secure_url").toString().split("authenticated")[1];
 
             order.setProofOfPaymentSecureUrl(secureUrl);
@@ -114,7 +125,7 @@ public class OrderService {
 
             this.orderRepository.save(order);
         } catch (IOException e) {
-            log.error("Erro ao fazer o upload do arquivo para o pedido: {}", orderId, e);
+            log.error("Erro ao fazer o upload do arquivo para o pedido: {}", order.getId(), e);
             throw new RuntimeException("Erro ao fazer o upload do arquivo");
         }
     }

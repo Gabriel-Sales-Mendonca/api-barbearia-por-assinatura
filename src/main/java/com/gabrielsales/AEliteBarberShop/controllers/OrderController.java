@@ -52,13 +52,9 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
     }
 
-    @PostMapping("/proof-of-payment/{id}")
-    public ResponseEntity<String> receiveProofOfPayment(
-            @PathVariable Long id,
-            @RequestParam MultipartFile file
-    ) {
-        this.orderService.receiveProofOfPayment(id, file);
-
+    @PostMapping("/proof-of-payment")
+    public ResponseEntity<String> receiveProofOfPayment(@RequestParam MultipartFile file) {
+        this.orderService.receiveProofOfPayment(file);
         return ResponseEntity.status(HttpStatus.OK).body("Upload da imagem feito com sucesso");
     }
 
