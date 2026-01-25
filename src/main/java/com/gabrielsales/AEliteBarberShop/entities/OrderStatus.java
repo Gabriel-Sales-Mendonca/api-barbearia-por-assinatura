@@ -4,7 +4,8 @@ public enum OrderStatus {
     AWAITING_PROOF_OF_PAYMENT("Aguardando comprovante de pagamento"),
     AWAITING_PAYMENT_APPROVAL("Aguardando aprovação do pagamento"),
     PAYMENT_APPROVED("Pagamento aprovado"),
-    PAYMENT_REJECTED("Pagamento rejeitado");
+    PAYMENT_REJECTED("Pagamento rejeitado"),
+    CANCELED_ORDER("Pedido cancelado");
 
     private final String orderStatus;
 
