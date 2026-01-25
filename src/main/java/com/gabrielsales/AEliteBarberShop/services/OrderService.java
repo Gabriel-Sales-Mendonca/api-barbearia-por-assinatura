@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,7 +43,7 @@ public class OrderService {
         User user = this.userService.getTokenUser();
         Plan plan = this.planService.findById(planId);
 
-        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT);
+        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
         if (existingOrder != null) {
             log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status aguardando comprovante de pagamento");
             throw new ResourceAlreadyExistsException(
@@ -77,8 +78,14 @@ public class OrderService {
     public Page<Order> findAll(Pageable pageable) {
         pageable = this.getValidPageable(pageable);
 
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "date")
+        );
+
         User user = this.userService.getTokenUser();
-        return this.orderRepository.findAllByUserId(user.getId(), pageable);
+        return this.orderRepository.findAllByUserId(user.getId(), sortedPageable);
     }
 
     public Order findById(Long id) {
