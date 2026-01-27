@@ -175,7 +175,10 @@ public class OrderService {
         log.info("Cancelando pedido do usuário: {}", user.getId());
 
         Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
-        if (existingOrder == null) throw new InvalidResourceException("Não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
+        if (existingOrder == null) {
+            log.warn("Falha ao cancelar, não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
+            throw new InvalidResourceException("Não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
+        }
 
         existingOrder.setOrderStatus(OrderStatus.CANCELED_ORDER);
 
