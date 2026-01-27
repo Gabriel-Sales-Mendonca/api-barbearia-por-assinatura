@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -44,19 +45,21 @@ public class OrderService {
         Plan plan = this.planService.findById(planId);
 
         Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
-        if (existingOrder.getOrderStatus().equals(OrderStatus.AWAITING_PROOF_OF_PAYMENT)) {
-            log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status {}", OrderStatus.AWAITING_PROOF_OF_PAYMENT);
-            throw new ResourceAlreadyExistsException(
-                    "Já existe uma pedido de assinatura com o status: " +
-                            existingOrder.getOrderStatus().getOrderStatus().toUpperCase() +
-                            ". Envie um comprovante de pagamento ou cancele esse pedido para criar uma nova assinatura.");
-        }
-        if (existingOrder.getOrderStatus().equals(OrderStatus.AWAITING_PAYMENT_APPROVAL)) {
-            log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status {}", OrderStatus.AWAITING_PAYMENT_APPROVAL);
-            throw new ResourceAlreadyExistsException(
-                    "Já existe uma pedido de assinatura com o status: " +
-                            existingOrder.getOrderStatus().getOrderStatus().toUpperCase() +
-                            ". Aguarde a aprovação do pagamento ou se você tiver enviado um comprovante errado ou escolhido um plano errado, cancele o pedido, crie um novo e envie o comprovante.");
+        if (existingOrder != null) {
+            if (existingOrder.getOrderStatus().equals(OrderStatus.AWAITING_PROOF_OF_PAYMENT)) {
+                log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status {}", OrderStatus.AWAITING_PROOF_OF_PAYMENT);
+                throw new ResourceAlreadyExistsException(
+                        "Já existe uma pedido de assinatura com o status: " +
+                                existingOrder.getOrderStatus().getOrderStatus().toUpperCase() +
+                                ". Envie um comprovante de pagamento ou cancele esse pedido para criar uma nova assinatura.");
+            }
+            if (existingOrder.getOrderStatus().equals(OrderStatus.AWAITING_PAYMENT_APPROVAL)) {
+                log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status {}", OrderStatus.AWAITING_PAYMENT_APPROVAL);
+                throw new ResourceAlreadyExistsException(
+                        "Já existe uma pedido de assinatura com o status: " +
+                                existingOrder.getOrderStatus().getOrderStatus().toUpperCase() +
+                                ". Aguarde a aprovação do pagamento ou se você tiver enviado um comprovante errado ou escolhido um plano errado, cancele o pedido, crie um novo e envie o comprovante.");
+            }
         }
 
         Order order = new Order(
@@ -165,6 +168,18 @@ public class OrderService {
             order.setDate(dateNow);
             this.orderRepository.save(order);
         }
+    }
+
+    public Order cancel() {
+        User user = this.userService.getTokenUser();
+        log.info("Cancelando pedido do usuário: {}", user.getId());
+
+        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
+        if (existingOrder == null) throw new InvalidResourceException("Não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
+
+        existingOrder.setOrderStatus(OrderStatus.CANCELED_ORDER);
+
+        return this.orderRepository.save(existingOrder);
     }
 
 }

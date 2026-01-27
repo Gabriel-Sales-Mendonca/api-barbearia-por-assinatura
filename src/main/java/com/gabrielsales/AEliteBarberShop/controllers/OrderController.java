@@ -6,6 +6,8 @@ import com.gabrielsales.AEliteBarberShop.dtos.OrderResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.Order;
 import com.gabrielsales.AEliteBarberShop.mappers.OrderMapper;
 import com.gabrielsales.AEliteBarberShop.services.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
     private final OrderMapper orderMapper;
 
@@ -62,6 +65,15 @@ public class OrderController {
     public ResponseEntity<String> approveOrRejectPayment(@RequestBody ApprovePaymentRequestDTO requestDTO) {
         this.orderService.approveOrRejectPayment(requestDTO.id(), requestDTO.approve());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/cancel")
+    public ResponseEntity<OrderResponseDTO> cancel() {
+        Order canceledOrder = this.orderService.cancel();
+        log.info("Pedido cancelado com sucesso");
+        OrderResponseDTO orderResponseDTO = this.orderMapper.toDTO(canceledOrder);
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderResponseDTO);
     }
 
 }
