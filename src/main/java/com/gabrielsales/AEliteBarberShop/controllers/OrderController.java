@@ -3,6 +3,7 @@ package com.gabrielsales.AEliteBarberShop.controllers;
 import com.gabrielsales.AEliteBarberShop.dtos.ApprovePaymentRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.OrderRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.OrderResponseDTO;
+import com.gabrielsales.AEliteBarberShop.dtos.OrderToApproveResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.Order;
 import com.gabrielsales.AEliteBarberShop.mappers.OrderMapper;
 import com.gabrielsales.AEliteBarberShop.services.OrderService;
@@ -15,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -42,17 +41,17 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<Page<OrderResponseDTO>> findAll(@PageableDefault(size = 10) Pageable pageable) {
         Page<Order> orders = this.orderService.findAll(pageable);
-        Page<OrderResponseDTO> ordersResponseDTO = orders.map(order -> this.orderMapper.toDTO(order));
+        Page<OrderResponseDTO> ordersResponseDTO = orders.map(this.orderMapper::toDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
     }
 
     @GetMapping("/to-approve")
-    public ResponseEntity<Page<OrderResponseDTO>> findAllToApprove(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<OrderToApproveResponseDTO>> findAllToApprove(@PageableDefault(size = 10) Pageable pageable) {
         Page<Order> orders = this.orderService.findAllToApprove(pageable);
-        Page<OrderResponseDTO> ordersResponseDTO = orders.map(order -> this.orderMapper.toDTO(order));
+        Page<OrderToApproveResponseDTO> ordersToApproveResponseDTO = orders.map(this.orderMapper::toOrderToApprove);
 
-        return ResponseEntity.status(HttpStatus.OK).body(ordersResponseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ordersToApproveResponseDTO);
     }
 
     @PostMapping("/proof-of-payment")
