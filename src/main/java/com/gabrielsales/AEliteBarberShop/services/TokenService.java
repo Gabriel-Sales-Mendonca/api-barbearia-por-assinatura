@@ -25,6 +25,7 @@ public class TokenService {
             String token = JWT.create()
                     .withIssuer("a-elite-barber-shop-api") // identificador da sua API (útil para validar depois)
                     .withSubject(user.getUsername()) // quem é o dono do token (identificador único do usuário)
+                    .withClaim("role", user.getRole().getRole())
                     .withExpiresAt(generateExpirationDate()) // tempo de expiração do token
                     .sign(algorithm); // assinatura final com a chave secreta
 
