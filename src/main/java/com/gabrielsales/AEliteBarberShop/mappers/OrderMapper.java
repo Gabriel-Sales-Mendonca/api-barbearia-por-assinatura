@@ -22,7 +22,7 @@ public class OrderMapper {
                 order.getId(),
                 order.getValue(),
                 order.getDate(),
-                order.getProofOfPaymentSecureUrl(),
+                "https://res.cloudinary.com/dcj8yyb1e/image/authenticated" + order.getProofOfPaymentSecureUrl(),
                 order.getUser().getLogin(),
                 order.getPlan().getName()
         );
