@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -44,7 +44,7 @@ public class OrderService {
         User user = this.userService.getTokenUser();
         Plan plan = this.planService.findById(planId);
 
-        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
+        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusIn(user.getId(), Arrays.asList(OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL));
         if (existingOrder != null) {
             if (existingOrder.getOrderStatus().equals(OrderStatus.AWAITING_PROOF_OF_PAYMENT)) {
                 log.info("Tentiva de criar pedido de assinatura sendo que já exisitia um pedido com o status {}", OrderStatus.AWAITING_PROOF_OF_PAYMENT);
@@ -174,7 +174,7 @@ public class OrderService {
         User user = this.userService.getTokenUser();
         log.info("Cancelando pedido do usuário: {}", user.getId());
 
-        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusOrOrderStatus(user.getId(), OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL);
+        Order existingOrder = this.orderRepository.findAllByUserIdAndOrderStatusIn(user.getId(), Arrays.asList(OrderStatus.AWAITING_PROOF_OF_PAYMENT, OrderStatus.AWAITING_PAYMENT_APPROVAL));
         if (existingOrder == null) {
             log.warn("Falha ao cancelar, não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
             throw new InvalidResourceException("Não existe nenhum pedido aguardando comprovante ou aprovação de pagamento.");
