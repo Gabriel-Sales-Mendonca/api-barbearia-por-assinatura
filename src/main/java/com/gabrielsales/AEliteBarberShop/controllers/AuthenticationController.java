@@ -5,6 +5,7 @@ import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.entities.UserRole;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
+import com.gabrielsales.AEliteBarberShop.services.EmailService;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,13 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final EmailService emailService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, TokenService tokenService) {
+    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, TokenService tokenService, EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.tokenService = tokenService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/login")
