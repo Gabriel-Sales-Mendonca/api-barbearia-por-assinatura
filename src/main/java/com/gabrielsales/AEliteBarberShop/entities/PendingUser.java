@@ -3,6 +3,7 @@ package com.gabrielsales.AEliteBarberShop.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @Entity
 @Table(name = "tb_pending_user")
@@ -15,20 +16,26 @@ public class PendingUser {
     private String password;
     private String name;
     private String lastname;
-    private String verificationToken;
+    private String verificationCode;
     private LocalDateTime createdAt;
     private LocalDateTime expiryDate;
 
     public PendingUser() {};
 
-    public PendingUser(String login, String password, String name, String lastname, String verificationToken, LocalDateTime createdAt, LocalDateTime expiryDate) {
+    public PendingUser(String login, String password, String name, String lastname, String verificationCode, LocalDateTime createdAt, LocalDateTime expiryDate) {
         this.login = login;
         this.password = password;
         this.name = name;
         this.lastname = lastname;
-        this.verificationToken = verificationToken;
+        this.verificationCode = verificationCode;
         this.createdAt = createdAt;
         this.expiryDate = expiryDate;
+    }
+
+    public static String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000);
+        return String.valueOf(code);
     }
 
     public boolean isExpired() {
@@ -55,8 +62,8 @@ public class PendingUser {
         return lastname;
     }
 
-    public String getVerificationToken() {
-        return verificationToken;
+    public String getVerificationCode() {
+        return verificationCode;
     }
 
     public LocalDateTime getCreatedAt() {
