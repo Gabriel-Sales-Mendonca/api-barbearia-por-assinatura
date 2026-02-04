@@ -2,11 +2,15 @@ package com.gabrielsales.AEliteBarberShop.controllers;
 
 import com.gabrielsales.AEliteBarberShop.dtos.AuthenticationDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
+import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.entities.UserRole;
+import com.gabrielsales.AEliteBarberShop.repositories.PendingUserRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.EmailService;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -17,18 +21,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final PendingUserRepository pendingUserRepository;
     private final TokenService tokenService;
     private final EmailService emailService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, TokenService tokenService, EmailService emailService) {
+    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, PendingUserRepository pendingUserRepository, TokenService tokenService, EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
+        this.pendingUserRepository = pendingUserRepository;
         this.tokenService = tokenService;
         this.emailService = emailService;
     }
@@ -68,21 +78,27 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterDTO data) {
-        if (this.userRepository.findByLogin(data.login()) != null) {
+        if (this.userRepository.existsByLogin(data.login()) || this.pendingUserRepository.existsByLogin(data.login())) {
+            log.info("Login já existe no banco de dados");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
+        String verificationCode = PendingUser.generateVerificationCode();
+
         String passwordEncoded = new BCryptPasswordEncoder().encode(data.password());
 
-        User newUser = new User(
+        PendingUser newPendingUser = new PendingUser(
                 data.login(),
                 passwordEncoded,
                 data.name(),
                 data.lastname(),
-                UserRole.USER
-                );
+                verificationCode,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1)
+        );
 
-        this.userRepository.save(newUser);
+        this.pendingUserRepository.save(newPendingUser);
+        log.info("Usuário pendente criado com sucesso");
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
