@@ -22,6 +22,12 @@ public class PendingUser {
 
     public PendingUser() {};
 
+    public PendingUser(String login, String password, String name, String lastname) {
+        this.login = login;
+        this.name = name;
+        this.lastname = lastname;
+    }
+
     public PendingUser(String login, String password, String name, String lastname, String verificationCode, LocalDateTime createdAt, LocalDateTime expiryDate) {
         this.login = login;
         this.password = password;
@@ -52,6 +58,10 @@ public class PendingUser {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getName() {

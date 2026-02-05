@@ -5,6 +5,7 @@ import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.VerifyEmailDTO;
 import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
 import com.gabrielsales.AEliteBarberShop.entities.User;
+import com.gabrielsales.AEliteBarberShop.mappers.AuthenticationMapper;
 import com.gabrielsales.AEliteBarberShop.repositories.PendingUserRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.AuthenticationService;
@@ -34,23 +35,23 @@ public class AuthenticationController {
     private final UserRepository userRepository;
     private final PendingUserRepository pendingUserRepository;
     private final TokenService tokenService;
-    private final EmailService emailService;
     private final AuthenticationService authenticationService;
+    private final AuthenticationMapper authenticationMapper;
 
     public AuthenticationController(
             AuthenticationManager authenticationManager,
             UserRepository userRepository,
             PendingUserRepository pendingUserRepository,
             TokenService tokenService,
-            EmailService emailService,
-            AuthenticationService authenticationService
+            AuthenticationService authenticationService,
+            AuthenticationMapper authenticationMapper
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.pendingUserRepository = pendingUserRepository;
         this.tokenService = tokenService;
-        this.emailService = emailService;
         this.authenticationService = authenticationService;
+        this.authenticationMapper = authenticationMapper;
     }
 
     @PostMapping("/login")
@@ -87,30 +88,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterDTO data) {
+    @Transactional
+    public ResponseEntity<?> register(@RequestBody RegisterDTO data) {
         if (this.userRepository.existsByLogin(data.login()) || this.pendingUserRepository.existsByLogin(data.login())) {
             log.info("Login já existe no banco de dados");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        String verificationCode = PendingUser.generateVerificationCode();
-
-        String passwordEncoded = new BCryptPasswordEncoder().encode(data.password());
-
-        PendingUser newPendingUser = new PendingUser(
-                data.login(),
-                passwordEncoded,
-                data.name(),
-                data.lastname(),
-                verificationCode,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15)
-        );
-
-        this.pendingUserRepository.save(newPendingUser);
-        log.info("Usuário pendente criado com sucesso");
-
-        this.emailService.sendVerificationCodeEmail(data.login(), data.name(), verificationCode);
+        this.authenticationService.register(this.authenticationMapper.toEntity(data));
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

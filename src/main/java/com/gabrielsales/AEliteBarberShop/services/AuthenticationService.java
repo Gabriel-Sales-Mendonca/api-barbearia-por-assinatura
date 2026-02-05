@@ -7,10 +7,13 @@ import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceExce
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,22 @@ public class AuthenticationService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.userRepository.findByLogin(username);
+    }
+
+    public void register(PendingUser pendingUser) {
+        String verificationCode = PendingUser.generateVerificationCode();
+
+        String passwordEncoded = new BCryptPasswordEncoder().encode(pendingUser.getPassword());
+
+        pendingUser.setPassword(passwordEncoded);
+        pendingUser.setVerificationCode(verificationCode);
+        pendingUser.setCreatedAt(LocalDateTime.now());
+        pendingUser.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+
+        this.pendingUserRepository.save(pendingUser);
+        log.info("Usuário pendente criado com sucesso");
+
+        this.emailService.sendVerificationCodeEmail(pendingUser.getLogin(), pendingUser.getName(), verificationCode);
     }
 
     public void verifyEmail(String email, String verificationCode) {
