@@ -2,13 +2,15 @@ package com.gabrielsales.AEliteBarberShop.controllers;
 
 import com.gabrielsales.AEliteBarberShop.dtos.AuthenticationDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
+import com.gabrielsales.AEliteBarberShop.dtos.VerifyEmailDTO;
 import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
 import com.gabrielsales.AEliteBarberShop.entities.User;
-import com.gabrielsales.AEliteBarberShop.entities.UserRole;
 import com.gabrielsales.AEliteBarberShop.repositories.PendingUserRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
+import com.gabrielsales.AEliteBarberShop.services.AuthenticationService;
 import com.gabrielsales.AEliteBarberShop.services.EmailService;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,12 +19,10 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -34,13 +34,22 @@ public class AuthenticationController {
     private final PendingUserRepository pendingUserRepository;
     private final TokenService tokenService;
     private final EmailService emailService;
+    private final AuthenticationService authenticationService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, PendingUserRepository pendingUserRepository, TokenService tokenService, EmailService emailService) {
+    public AuthenticationController(
+            AuthenticationManager authenticationManager,
+            UserRepository userRepository,
+            PendingUserRepository pendingUserRepository,
+            TokenService tokenService,
+            EmailService emailService,
+            AuthenticationService authenticationService
+    ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.pendingUserRepository = pendingUserRepository;
         this.tokenService = tokenService;
         this.emailService = emailService;
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping("/login")
@@ -94,7 +103,7 @@ public class AuthenticationController {
                 data.lastname(),
                 verificationCode,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusHours(1)
+                LocalDateTime.now().plusMinutes(15)
         );
 
         this.pendingUserRepository.save(newPendingUser);
@@ -103,6 +112,13 @@ public class AuthenticationController {
         this.emailService.sendVerificationCodeEmail(data.login(), data.name(), verificationCode);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity verifyEmail(@RequestBody VerifyEmailDTO verifyEmailDTO) {
+        this.authenticationService.verifyEmail(verifyEmailDTO.email(), verifyEmailDTO.verificationCode());
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
