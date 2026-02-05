@@ -100,6 +100,8 @@ public class AuthenticationController {
         this.pendingUserRepository.save(newPendingUser);
         log.info("Usuário pendente criado com sucesso");
 
+        this.emailService.sendVerificationCodeEmail(data.login(), data.name(), verificationCode);
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
