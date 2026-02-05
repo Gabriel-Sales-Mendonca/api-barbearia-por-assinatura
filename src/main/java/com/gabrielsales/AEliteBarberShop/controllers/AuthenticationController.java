@@ -101,10 +101,11 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity verifyEmail(@RequestBody VerifyEmailDTO verifyEmailDTO) {
+    @Transactional
+    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailDTO verifyEmailDTO) {
         this.authenticationService.verifyEmail(verifyEmailDTO.email(), verifyEmailDTO.verificationCode());
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/resend-code")

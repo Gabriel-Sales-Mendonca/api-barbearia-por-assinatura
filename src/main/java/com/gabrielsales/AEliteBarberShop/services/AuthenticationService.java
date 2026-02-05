@@ -1,6 +1,8 @@
 package com.gabrielsales.AEliteBarberShop.services;
 
 import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
+import com.gabrielsales.AEliteBarberShop.entities.User;
+import com.gabrielsales.AEliteBarberShop.entities.UserRole;
 import com.gabrielsales.AEliteBarberShop.repositories.PendingUserRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
@@ -61,6 +63,19 @@ public class AuthenticationService implements UserDetailsService {
         if (pendingUser.isExpired()) throw new CredentialsExpiredException("Código de verificação expirado, solicite um novo!");
 
         log.info("Código de verificação de email verificado com sucesso");
+
+        User user = new User(
+                pendingUser.getLogin(),
+                pendingUser.getPassword(),
+                pendingUser.getName(),
+                pendingUser.getLastname(),
+                UserRole.USER
+        );
+
+        this.userRepository.save(user);
+        this.pendingUserRepository.deleteById(pendingUser.getId());
+
+        log.info("Novo usuário criado com sucesso");
     }
 
     public void resendCode(String email) {
