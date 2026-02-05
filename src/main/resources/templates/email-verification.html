@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificação de Email - A Elite Barber Shop</title>
+    <title>Código de Verificação - A Elite Barber Shop</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
 <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4;">
@@ -27,49 +27,47 @@
                 <tr>
                     <td style="padding: 40px 30px;">
                         <h2 style="margin: 0 0 20px 0; color: #333333; font-size: 24px; font-weight: bold;">
-                            Bem-vindo! 👋
+                            Olá, {{USER_NAME}}! 👋
                         </h2>
 
-                        <p style="margin: 0 0 20px 0; color: #666666; font-size: 16px; line-height: 1.6;">
-                            Obrigado por se cadastrar na <strong>A Elite Barber Shop</strong>! Estamos muito felizes em tê-lo conosco.
-                        </p>
-
                         <p style="margin: 0 0 30px 0; color: #666666; font-size: 16px; line-height: 1.6;">
-                            Para completar seu cadastro e garantir a segurança da sua conta, precisamos que você verifique seu endereço de e-mail clicando no botão abaixo:
+                            Obrigado por se cadastrar na <strong>A Elite Barber Shop</strong>! Use o código abaixo para verificar seu email e concluir seu cadastro:
                         </p>
 
-                        <!-- Button -->
-                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <td align="center" style="padding: 0 0 30px 0;">
-                                    <a href="{{VERIFICATION_LINK}}"
-                                       style="display: inline-block; padding: 16px 40px; background-color: #1a1a1a; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 4px; transition: background-color 0.3s;">
-                                        Verificar Meu E-mail
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
+                        <!-- Código de Verificação -->
+                        <div style="background: #f9f9f9; border: 2px dashed #1a1a1a; border-radius: 8px; padding: 30px; text-align: center; margin: 0 0 30px 0;">
+                            <div style="font-size: 14px; color: #666666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                Seu Código de Verificação
+                            </div>
+                            <div style="font-size: 48px; font-weight: bold; color: #1a1a1a; letter-spacing: 12px; font-family: 'Courier New', Courier, monospace; margin: 10px 0;">
+                                {{VERIFICATION_CODE}}
+                            </div>
+                            <div style="font-size: 12px; color: #999999; margin-top: 10px;">
+                                Digite este código no site para continuar
+                            </div>
+                        </div>
 
-                        <div style="background-color: #f9f9f9; border-left: 4px solid #1a1a1a; padding: 15px 20px; margin: 0 0 30px 0;">
-                            <p style="margin: 0; color: #666666; font-size: 14px; line-height: 1.6;">
-                                <strong>⏰ Link válido por 24 horas</strong><br>
-                                Por questões de segurança, este link de verificação expirará em 24 horas.
+                        <!-- Aviso de Expiração -->
+                        <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 20px; margin: 0 0 30px 0; border-radius: 4px;">
+                            <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
+                                ⏰ <strong>Este código expira em 15 minutos</strong><br>
+                                Por questões de segurança, você tem no máximo 5 tentativas para inserir o código correto.
                             </p>
                         </div>
 
-                        <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px; line-height: 1.6;">
-                            Se o botão não funcionar, copie e cole o link abaixo no seu navegador:
-                        </p>
-
-                        <p style="margin: 0 0 30px 0; color: #4a90e2; font-size: 13px; word-break: break-all; background-color: #f5f5f5; padding: 12px; border-radius: 4px;">
-                            {{VERIFICATION_LINK}}
-                        </p>
+                        <!-- Dica de Copiar/Colar -->
+                        <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px 20px; margin: 0 0 30px 0; border-radius: 4px;">
+                            <p style="margin: 0; color: #0d47a1; font-size: 13px; line-height: 1.6;">
+                                💡 <strong>Dica:</strong> Você pode copiar e colar este código diretamente no campo de verificação do site.
+                            </p>
+                        </div>
 
                         <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
 
+                        <!-- Aviso de Segurança -->
                         <p style="margin: 0; color: #999999; font-size: 13px; line-height: 1.6;">
-                            <strong>Não solicitou este cadastro?</strong><br>
-                            Se você não criou uma conta na A Elite Barber Shop, por favor ignore este e-mail. Sua segurança é nossa prioridade.
+                            <strong>Não solicitou este código?</strong><br>
+                            Se você não criou uma conta na A Elite Barber Shop, por favor ignore este e-mail. Nenhuma ação adicional é necessária.
                         </p>
                     </td>
                 </tr>
