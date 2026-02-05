@@ -8,11 +8,12 @@ import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundExc
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.CredentialsExpiredException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -20,10 +21,12 @@ public class AuthenticationService implements UserDetailsService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private final UserRepository userRepository;
     private final PendingUserRepository pendingUserRepository;
+    private final EmailService emailService;
 
-    public AuthenticationService(UserRepository userRepository, PendingUserRepository pendingUserRepository) {
+    public AuthenticationService(UserRepository userRepository, PendingUserRepository pendingUserRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.pendingUserRepository = pendingUserRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -40,4 +43,21 @@ public class AuthenticationService implements UserDetailsService {
 
         log.info("Código de verificação de email verificado com sucesso");
     }
+
+    public void resendCode(String email) {
+        PendingUser pendingUser = this.pendingUserRepository.findByLogin(email)
+                .orElseThrow(() -> new ResourceNotFoundException(email));
+
+        String verificationCode = PendingUser.generateVerificationCode();
+
+        pendingUser.setVerificationCode(verificationCode);
+        pendingUser.setCreatedAt(LocalDateTime.now());
+        pendingUser.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+
+        this.pendingUserRepository.save(pendingUser);
+
+        this.emailService.sendVerificationCodeEmail(pendingUser.getLogin(), pendingUser.getName(), pendingUser.getVerificationCode());
+        log.info("Código de verificação de email enviado novamente para: {}", pendingUser.getLogin());
+    }
+
 }

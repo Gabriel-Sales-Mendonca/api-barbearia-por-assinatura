@@ -10,7 +10,6 @@ import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.AuthenticationService;
 import com.gabrielsales.AEliteBarberShop.services.EmailService;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
-import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -20,9 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -117,6 +118,14 @@ public class AuthenticationController {
     @PostMapping("/verify-email")
     public ResponseEntity verifyEmail(@RequestBody VerifyEmailDTO verifyEmailDTO) {
         this.authenticationService.verifyEmail(verifyEmailDTO.email(), verifyEmailDTO.verificationCode());
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/resend-code")
+    @Transactional
+    public ResponseEntity<?> resendCode(@RequestBody Map<String, String> resendEmail) {
+        this.authenticationService.resendCode(resendEmail.get("email"));
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
