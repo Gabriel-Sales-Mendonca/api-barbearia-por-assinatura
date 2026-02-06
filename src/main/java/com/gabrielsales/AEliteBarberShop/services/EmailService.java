@@ -29,17 +29,16 @@ public class EmailService {
     @Value("${mailersend.sender.email-address}")
     private String senderEmailAddress;
 
-    public void sendEmail(String recipientEmailAddress) {
-
+    private void sendEmail(String recipientEmail, String recipientName, String subject, String htmlContent, String plainText) {
         Email email = new Email();
 
         email.setFrom(senderName, senderEmailAddress);
-        email.addRecipient("name", recipientEmailAddress);
+        email.addRecipient(recipientName, recipientEmail);
 
-        email.setSubject("Seu código de verificação - A Elite Barber Shop");
+        email.setSubject(subject);
 
-        email.setPlain("This is the text content");
-        email.setHtml("<p>This is the HTML content</p>");
+        email.setPlain(plainText);
+        email.setHtml(htmlContent);
 
         MailerSend ms = new MailerSend();
 
@@ -49,7 +48,8 @@ public class EmailService {
             MailerSendResponse response = ms.emails().send(email);
             log.info("Email enviado com sucesso");
         } catch (MailerSendException e) {
-            log.error("Erro ao enviar email", e);
+            log.error("Erro ao enviar email para: {}", recipientEmail, e);
+            throw new RuntimeException("Falha ao enviar email de verificação", e);
         }
     }
 
@@ -66,26 +66,10 @@ public class EmailService {
                 code
         );
 
-        Email email = new Email();
+        String subject = "Seu código de verificação - A Elite Barber Shop";
 
-        email.setFrom(senderName, senderEmailAddress);
-        email.addRecipient(recipientName, recipientEmail);
-
-        email.setSubject("Seu código de verificação - A Elite Barber Shop");
-
-        email.setPlain(plainText);
-        email.setHtml(htmlContent);
-
-        MailerSend ms = new MailerSend();
-        ms.setToken(apiTokenMailersend);
-
-        try {
-            MailerSendResponse response = ms.emails().send(email);
-            log.info("Email com código enviado para: {}", recipientEmail);
-        } catch (MailerSendException e) {
-            log.error("Erro ao enviar email para: {}", recipientEmail, e);
-            throw new RuntimeException("Falha ao enviar email de verificação", e);
-        }
+        this.sendEmail(recipientEmail, recipientName, subject, htmlContent, plainText);
+        log.info("Email com código enviado para: {}", recipientEmail);
     }
 
     private String loadEmailTemplate(String templateName, String userName, String verificationCode) {
@@ -129,4 +113,10 @@ public class EmailService {
                 "</html>";
     }
 
+    public void sendAccessRecoveryEmail(String recipientEmail, String recipientName, String code) {
+        String subject = "Recuperação de Senha - A Elite Barber Shop";
+        String plainText = "Para recuperar sua senha acesse o Link e informe este código: " + code + ", e insira sua nova senha";
+
+        this.sendEmail(recipientEmail, recipientName, subject, null, plainText);
+    }
 }
