@@ -24,8 +24,16 @@ public class PasswordForgot {
         this.expiryDate = expiryDate;
     }
 
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode;
+    }
+
+    public LocalDateTime getExpiryDate() {
+        return expiryDate;
     }
 
     public void setExpiryDate(LocalDateTime expiryDate) {

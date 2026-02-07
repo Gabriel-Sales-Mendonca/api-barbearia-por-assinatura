@@ -7,8 +7,12 @@ import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.repositories.PasswordForgotRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 @Service
 public class UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final PasswordForgotRepository passwordForgotRepository;
     private final EmailService emailService;
@@ -87,5 +92,25 @@ public class UserService {
         }
 
         this.emailService.sendAccessRecoveryEmail(user.getLogin(), user.getName(), verificationCode);
+    }
+
+    public void recoverAccess(String email, String verificationCode, String password) {
+        PasswordForgot passwordForgot = this.passwordForgotRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(email));
+
+        User user = (User) this.userRepository.findByLogin(email);
+        if (user == null) {
+            log.warn("Usuário não existe na tabela de usuário, mas existe na tabela de esqueceu a senha");
+            throw new InvalidResourceException("Usuário não existe");
+        }
+
+        if (!passwordForgot.getVerificationCode().equals(verificationCode)) throw new InvalidResourceException("Código de verificação incorreto");
+        if (passwordForgot.getExpiryDate().isBefore(LocalDateTime.now())) throw new CredentialsExpiredException("Código de verificação expirado, solicite um novo!");
+
+        String passwordEncoded = new BCryptPasswordEncoder().encode(password);
+        user.setPassword(passwordEncoded);
+
+        this.userRepository.save(user);
+        log.info("Senha de usuário: {}, que esqueceu a senha alterada com sucesso", email);
     }
 }

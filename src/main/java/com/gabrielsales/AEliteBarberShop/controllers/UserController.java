@@ -1,9 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers;
 
-import com.gabrielsales.AEliteBarberShop.dtos.PasswordForgotDTO;
-import com.gabrielsales.AEliteBarberShop.dtos.UserResponseDTO;
-import com.gabrielsales.AEliteBarberShop.dtos.UserUpdateDTO;
-import com.gabrielsales.AEliteBarberShop.dtos.UserUpdatePasswordDTO;
+import com.gabrielsales.AEliteBarberShop.dtos.*;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.mappers.UserMapper;
 import com.gabrielsales.AEliteBarberShop.services.UserService;
@@ -56,4 +53,17 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PostMapping("/recover-access")
+    @Transactional
+    public ResponseEntity<?> recoverAccess(@RequestBody RecoverAccessDTO recoverAccessDTO) {
+        this.userService.recoverAccess(
+                recoverAccessDTO.email(),
+                recoverAccessDTO.verificationCode(),
+                recoverAccessDTO.password()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }
