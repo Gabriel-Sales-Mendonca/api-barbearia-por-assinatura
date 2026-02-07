@@ -24,6 +24,10 @@ public class PasswordForgot {
         this.expiryDate = expiryDate;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getVerificationCode() {
         return verificationCode;
     }

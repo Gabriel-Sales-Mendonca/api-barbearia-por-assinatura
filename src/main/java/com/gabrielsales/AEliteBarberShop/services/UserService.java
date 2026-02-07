@@ -111,6 +111,7 @@ public class UserService {
         user.setPassword(passwordEncoded);
 
         this.userRepository.save(user);
+        this.passwordForgotRepository.deleteById(passwordForgot.getId());
         log.info("Senha de usuário: {}, que esqueceu a senha alterada com sucesso", email);
     }
 }
