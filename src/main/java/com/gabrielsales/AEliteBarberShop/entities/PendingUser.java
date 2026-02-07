@@ -24,6 +24,7 @@ public class PendingUser {
 
     public PendingUser(String login, String password, String name, String lastname) {
         this.login = login;
+        this.password = password;
         this.name = name;
         this.lastname = lastname;
     }
