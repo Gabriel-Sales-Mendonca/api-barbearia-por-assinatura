@@ -59,7 +59,7 @@ public class AuthenticationService implements UserDetailsService {
         PendingUser pendingUser = this.pendingUserRepository.findByLogin(email)
                 .orElseThrow(() -> new ResourceNotFoundException(email));
 
-        if (!pendingUser.getVerificationCode().equals(verificationCode)) throw new InvalidResourceException("Código de verificação inválido");
+        if (!pendingUser.getVerificationCode().equals(verificationCode)) throw new InvalidResourceException("Código de verificação incorreto");
         if (pendingUser.isExpired()) throw new CredentialsExpiredException("Código de verificação expirado, solicite um novo!");
 
         log.info("Código de verificação de email verificado com sucesso");
