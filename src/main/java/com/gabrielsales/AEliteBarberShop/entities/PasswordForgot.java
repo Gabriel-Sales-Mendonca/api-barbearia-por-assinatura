@@ -14,6 +14,8 @@ public class PasswordForgot {
     private String email;
     private String verificationCode;
     private LocalDateTime expiryDate;
+    private Integer attemptsRecoveryAccess = 0;
+    private Integer attemptsPasswordForgot = 0;
 
     public PasswordForgot() {
     }
@@ -42,5 +44,21 @@ public class PasswordForgot {
 
     public void setExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
+    }
+
+    public Integer getAttemptsRecoveryAccess() {
+        return attemptsRecoveryAccess;
+    }
+
+    public void setAttemptsRecoveryAccess(Integer attemptsRecoveryAccess) {
+        this.attemptsRecoveryAccess = attemptsRecoveryAccess;
+    }
+
+    public Integer getAttemptsPasswordForgot() {
+        return attemptsPasswordForgot;
+    }
+
+    public void setAttemptsPasswordForgot(Integer attemptsPasswordForgot) {
+        this.attemptsPasswordForgot = attemptsPasswordForgot;
     }
 }

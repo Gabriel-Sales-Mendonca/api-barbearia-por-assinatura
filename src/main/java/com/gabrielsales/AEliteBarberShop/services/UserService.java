@@ -8,6 +8,7 @@ import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.repositories.PasswordForgotRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.LimitExceededException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import jakarta.validation.ValidationException;
 import org.slf4j.Logger;
@@ -88,7 +89,11 @@ public class UserService {
         } else {
             passwordForgotDB.setVerificationCode(verificationCode);
             passwordForgotDB.setExpiryDate(expiryDate);
+            passwordForgotDB.setAttemptsRecoveryAccess(0);
+            passwordForgotDB.setAttemptsPasswordForgot(passwordForgotDB.getAttemptsPasswordForgot() + 1);
             this.passwordForgotRepository.save(passwordForgotDB);
+
+            if (passwordForgotDB.getAttemptsPasswordForgot() > 10) throw new LimitExceededException("Você atingiu o limite de tentativas de recuperação de senha, entre em contato com a barbearia.");
         }
 
         this.emailService.sendAccessRecoveryEmail(user.getLogin(), user.getName(), verificationCode);
@@ -103,6 +108,14 @@ public class UserService {
             log.warn("Usuário não existe na tabela de usuário, mas existe na tabela de esqueceu a senha");
             throw new InvalidResourceException("Usuário não existe");
         }
+
+        passwordForgot.setAttemptsRecoveryAccess(passwordForgot.getAttemptsRecoveryAccess() + 1);
+        if (passwordForgot.getAttemptsRecoveryAccess() > 5) {
+            log.warn("Usuário: {} atingiu o limite de tentativas de recuperar a senha para um determinado código", email);
+            throw new LimitExceededException("Você atingiu o limite de tentativas, solicite um novo código.");
+        }
+
+        this.passwordForgotRepository.save(passwordForgot);
 
         if (!passwordForgot.getVerificationCode().equals(verificationCode)) throw new InvalidResourceException("Código de verificação incorreto");
         if (passwordForgot.getExpiryDate().isBefore(LocalDateTime.now())) throw new CredentialsExpiredException("Código de verificação expirado, solicite um novo!");
