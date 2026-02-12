@@ -1,9 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.services;
 
-import com.gabrielsales.AEliteBarberShop.entities.Order;
-import com.gabrielsales.AEliteBarberShop.entities.OrderStatus;
-import com.gabrielsales.AEliteBarberShop.entities.Plan;
-import com.gabrielsales.AEliteBarberShop.entities.User;
+import com.gabrielsales.AEliteBarberShop.entities.*;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
@@ -19,21 +16,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
     @InjectMocks
     private OrderService orderService;
-
-    @Mock
-    private User user;
 
     @Mock
     private Plan plan;
@@ -52,20 +43,37 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        BDDMockito.given(this.userService.getTokenUser()).willReturn(user);
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        tokenUser.setId(1L);
+
+        BDDMockito.given(this.userService.getTokenUser()).willReturn(tokenUser);
     }
 
     @Test
     @DisplayName("Should throw exception when already exist order with status AWAITING_PROOF_OF_PAYMENT")
     void create_ShouldThrowException_WHenAlreadyExistOrderWithStatusAWAITING_PROOF_OF_PAYMENT() {
-        user.setId(1L);
         plan.setPrice(1.0);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
 
         Order order = new Order(
                 plan.getPrice(),
                 LocalDate.now(ZoneId.of("America/Sao_Paulo")),
                 OrderStatus.AWAITING_PROOF_OF_PAYMENT,
-                user,
+                orderUser,
                 plan
         );
 
@@ -78,14 +86,22 @@ class OrderServiceTest {
     @Test
     @DisplayName("Should throw exception when already exist order with status AWAITING_PAYMENT_APPROVAL")
     void create_ShouldThrowException_WHenAlreadyExistOrderWithStatusAWAITING_PAYMENT_APPROVAL() {
-        user.setId(1L);
         plan.setPrice(1.0);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
 
         Order order = new Order(
                 plan.getPrice(),
                 LocalDate.now(ZoneId.of("America/Sao_Paulo")),
                 OrderStatus.AWAITING_PAYMENT_APPROVAL,
-                user,
+                orderUser,
                 plan
         );
 
@@ -98,14 +114,22 @@ class OrderServiceTest {
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status PAYMENT_APPROVED")
     void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusPAYMENT_APPROVED() {
-        user.setId(1L);
         plan.setPrice(1.0);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
 
         Order order = new Order(
                 plan.getPrice(),
                 LocalDate.now(ZoneId.of("America/Sao_Paulo")),
                 OrderStatus.PAYMENT_APPROVED,
-                user,
+                orderUser,
                 plan
         );
 
@@ -118,14 +142,22 @@ class OrderServiceTest {
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status PAYMENT_REJECTED")
     void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusPAYMENT_REJECTED() {
-        user.setId(1L);
         plan.setPrice(1.0);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
 
         Order order = new Order(
                 plan.getPrice(),
                 LocalDate.now(ZoneId.of("America/Sao_Paulo")),
                 OrderStatus.PAYMENT_REJECTED,
-                user,
+                orderUser,
                 plan
         );
 
@@ -138,14 +170,22 @@ class OrderServiceTest {
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status CANCELED_ORDER")
     void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusCANCELED_ORDER() {
-        user.setId(1L);
         plan.setPrice(1.0);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
 
         Order order = new Order(
                 plan.getPrice(),
                 LocalDate.now(ZoneId.of("America/Sao_Paulo")),
                 OrderStatus.CANCELED_ORDER,
-                user,
+                orderUser,
                 plan
         );
 
@@ -161,6 +201,76 @@ class OrderServiceTest {
         BDDMockito.given(this.orderRepository.findById(any())).willReturn(Optional.empty());
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> this.orderService.findById(1L));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when the order doesn't exist for the token user")
+    void findById_ShouldThrowException_WhenOrderDoesNotExistForTheTokenUser() {
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        tokenUser.setId(1L);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
+
+        Order order = new Order(
+                plan.getPrice(),
+                LocalDate.now(ZoneId.of("America/Sao_Paulo")),
+                OrderStatus.CANCELED_ORDER,
+                orderUser,
+                plan
+        );
+
+        BDDMockito.given(this.userService.getTokenUser()).willReturn(tokenUser);
+        BDDMockito.given(this.orderRepository.findById(any())).willReturn(Optional.of(order));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> this.orderService.findById(1L));
+    }
+
+    @Test
+    @DisplayName("Return Order when the order exist for the token user")
+    void findById_ReturnOrder_WhenOrderExistForTheTokenUser() {
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        tokenUser.setId(2L);
+
+        User orderUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
+
+        Order order = new Order(
+                plan.getPrice(),
+                LocalDate.now(ZoneId.of("America/Sao_Paulo")),
+                OrderStatus.CANCELED_ORDER,
+                orderUser,
+                plan
+        );
+
+        BDDMockito.given(this.userService.getTokenUser()).willReturn(tokenUser);
+        BDDMockito.given(this.orderRepository.findById(any())).willReturn(Optional.of(order));
+
+        Assertions.assertEquals(order, this.orderService.findById(1L));
     }
 
 }
