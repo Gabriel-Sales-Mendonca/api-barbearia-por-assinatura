@@ -273,4 +273,39 @@ class OrderServiceTest {
         Assertions.assertEquals(order, this.orderService.findById(1L));
     }
 
+    @Test
+    @DisplayName("Return Order when the order exist and the user is ADMIN")
+    void findById_ReturnOrder_WhenOrderExistAndTheUserIsADMIN() {
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.ADMIN
+        );
+        tokenUser.setId(1L);
+
+        User orderUser = new User(
+                "admin@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        orderUser.setId(2L);
+
+        Order order = new Order(
+                plan.getPrice(),
+                LocalDate.now(ZoneId.of("America/Sao_Paulo")),
+                OrderStatus.CANCELED_ORDER,
+                orderUser,
+                plan
+        );
+
+        BDDMockito.given(this.userService.getTokenUser()).willReturn(tokenUser);
+        BDDMockito.given(this.orderRepository.findById(any())).willReturn(Optional.of(order));
+
+        Assertions.assertEquals(order, this.orderService.findById(1L));
+    }
+
 }
