@@ -71,7 +71,6 @@ class AuthenticationServiceTest {
     @DisplayName("Doesn't throw exception when everything is ok")
     void resendCode_ShouldNotThrowException_WhenEverythingIsOk() {
         String email = "example@email.com";
-        String verificationCode = "123";
 
         PendingUser pendingUser = new PendingUser();
 
