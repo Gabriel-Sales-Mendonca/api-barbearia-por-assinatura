@@ -2,6 +2,7 @@ package com.gabrielsales.AEliteBarberShop.services;
 
 import com.gabrielsales.AEliteBarberShop.entities.*;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
+import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -57,7 +58,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("Should throw exception when already exist order with status AWAITING_PROOF_OF_PAYMENT")
-    void create_ShouldThrowException_WHenAlreadyExistOrderWithStatusAWAITING_PROOF_OF_PAYMENT() {
+    void create_ShouldThrowException_WhenAlreadyExistOrderWithStatusAWAITING_PROOF_OF_PAYMENT() {
         plan.setPrice(1.0);
 
         User orderUser = new User(
@@ -85,7 +86,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("Should throw exception when already exist order with status AWAITING_PAYMENT_APPROVAL")
-    void create_ShouldThrowException_WHenAlreadyExistOrderWithStatusAWAITING_PAYMENT_APPROVAL() {
+    void create_ShouldThrowException_WhenAlreadyExistOrderWithStatusAWAITING_PAYMENT_APPROVAL() {
         plan.setPrice(1.0);
 
         User orderUser = new User(
@@ -113,7 +114,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status PAYMENT_APPROVED")
-    void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusPAYMENT_APPROVED() {
+    void create_DoesNotShouldThrowException_WhenAlreadyExistOrderWithStatusPAYMENT_APPROVED() {
         plan.setPrice(1.0);
 
         User orderUser = new User(
@@ -141,7 +142,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status PAYMENT_REJECTED")
-    void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusPAYMENT_REJECTED() {
+    void create_DoesNotShouldThrowException_WhenAlreadyExistOrderWithStatusPAYMENT_REJECTED() {
         plan.setPrice(1.0);
 
         User orderUser = new User(
@@ -169,7 +170,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("Doesn't should throw exception when already exist order with status CANCELED_ORDER")
-    void create_DoesNotShouldThrowException_WHenAlreadyExistOrderWithStatusCANCELED_ORDER() {
+    void create_DoesNotShouldThrowException_WhenAlreadyExistOrderWithStatusCANCELED_ORDER() {
         plan.setPrice(1.0);
 
         User orderUser = new User(
@@ -306,6 +307,70 @@ class OrderServiceTest {
         BDDMockito.given(this.orderRepository.findById(any())).willReturn(Optional.of(order));
 
         Assertions.assertEquals(order, this.orderService.findById(1L));
+    }
+
+    @Test
+    @DisplayName("Should cancel order when exists order AWAITING_PROOF_OF_PAYMENT")
+    void cancel_ShouldCancelOrder_WhenExistsOrderAWAITING_PROOF_OF_PAYMENT() {
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        tokenUser.setId(1L);
+
+        Order existingOrder = new Order(
+                plan.getPrice(),
+                LocalDate.now(ZoneId.of("America/Sao_Paulo")),
+                OrderStatus.AWAITING_PROOF_OF_PAYMENT,
+                tokenUser,
+                plan
+        );
+
+        BDDMockito.given(this.orderRepository.findAllByUserIdAndOrderStatusIn(any(), any())).willReturn(existingOrder);
+        BDDMockito.given(this.orderRepository.save(any())).willReturn(existingOrder);
+
+        Order order = this.orderService.cancel();
+
+        Assertions.assertEquals(OrderStatus.CANCELED_ORDER, order.getOrderStatus());
+    }
+
+    @Test
+    @DisplayName("Should cancel order when exists order AWAITING_PROOF_OF_PAYMENT")
+    void cancel_ShouldCancelOrder_WhenExistsOrderAWAITING_PAYMENT_APPROVAL() {
+        User tokenUser = new User(
+                "example@email.com",
+                "password",
+                "Name",
+                "Lastname",
+                UserRole.USER
+        );
+        tokenUser.setId(1L);
+
+        Order existingOrder = new Order(
+                plan.getPrice(),
+                LocalDate.now(ZoneId.of("America/Sao_Paulo")),
+                OrderStatus.AWAITING_PAYMENT_APPROVAL,
+                tokenUser,
+                plan
+        );
+
+        BDDMockito.given(this.orderRepository.findAllByUserIdAndOrderStatusIn(any(), any())).willReturn(existingOrder);
+        BDDMockito.given(this.orderRepository.save(any())).willReturn(existingOrder);
+
+        Order order = this.orderService.cancel();
+
+        Assertions.assertEquals(OrderStatus.CANCELED_ORDER, order.getOrderStatus());
+    }
+
+    @Test
+    @DisplayName("Does not should cancel order when not exists order AWAITING_PROOF_OF_PAYMENT or AWAITING_PAYMENT_APPROVAL")
+    void cancel_DoesNotShouldCancelOrder_WhenNotExistsOrderAWAITING_PROOF_OF_PAYMENT_Or_AWAITING_PAYMENT_APPROVAL() {
+        BDDMockito.given(this.orderRepository.findAllByUserIdAndOrderStatusIn(any(), any())).willReturn(null);
+
+        Assertions.assertThrows(InvalidResourceException.class, () -> this.orderService.cancel());
     }
 
 }
