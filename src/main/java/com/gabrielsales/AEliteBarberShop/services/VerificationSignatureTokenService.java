@@ -3,7 +3,9 @@ package com.gabrielsales.AEliteBarberShop.services;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.entities.VerificationSignatureToken;
 import com.gabrielsales.AEliteBarberShop.repositories.VerificationSignatureTokenRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -34,6 +36,12 @@ public class VerificationSignatureTokenService {
         this.verificationSignatureTokenRepository.save(verificationSignatureToken);
 
         return verificationToken;
+    }
+
+    @Transactional
+    @Scheduled(fixedRate = 300000) // 5 minutes
+    public void deleteExpiredTokens() {
+        this.verificationSignatureTokenRepository.deleteAllByExpireAtBefore(LocalDateTime.now());
     }
 
     private String generateToken() {
