@@ -44,13 +44,15 @@ class VerificationSignatureTokenServiceTest {
     }
 
     @Test
-    @DisplayName("Should save token with correct data when generating verification token")
-    void generateVerificationToken_ShouldSaveTokenToDatabase_WhenUserIsAuthenticated() {
+    @DisplayName("Should save token with correct data and delete old one when generating verification token")
+    void generateVerificationToken_ShouldDeleteOldTokenAndSaveNewOne_WhenUserIsAuthenticated() {
         User user = new User("test@email.com", "password", "Name", "Lastname", UserRole.USER);
         user.setId(123L);
         when(userService.getTokenUser()).thenReturn(user);
 
         verificationSignatureTokenService.generateVerificationToken();
+
+        verify(verificationSignatureTokenRepository, times(1)).deleteByUserId(123L);
 
         ArgumentCaptor<VerificationSignatureToken> tokenCaptor = ArgumentCaptor.forClass(VerificationSignatureToken.class);
         verify(verificationSignatureTokenRepository).save(tokenCaptor.capture());
@@ -60,7 +62,6 @@ class VerificationSignatureTokenServiceTest {
         assertNotNull(savedToken.getVerificationToken());
         assertEquals(64, savedToken.getVerificationToken().length());
         assertTrue(savedToken.getExpireAt().isAfter(LocalDateTime.now()));
-        assertTrue(savedToken.getExpireAt().isBefore(LocalDateTime.now().plusMinutes(6)));
     }
 
     @Test

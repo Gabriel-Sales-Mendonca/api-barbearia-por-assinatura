@@ -11,25 +11,17 @@ import java.time.LocalDateTime;
 public class VerificationSignatureToken {
 
     @Id
-    private Long userId;
     private String verificationToken;
+    private Long userId;
     private LocalDateTime expireAt;
 
     public VerificationSignatureToken() {
     }
 
-    public VerificationSignatureToken(Long userId, String verificationToken, LocalDateTime expireAt) {
-        this.userId = userId;
+    public VerificationSignatureToken(String verificationToken, Long userId, LocalDateTime expireAt) {
         this.verificationToken = verificationToken;
-        this.expireAt = expireAt;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
         this.userId = userId;
+        this.expireAt = expireAt;
     }
 
     public String getVerificationToken() {
@@ -38,6 +30,14 @@ public class VerificationSignatureToken {
 
     public void setVerificationToken(String verificationToken) {
         this.verificationToken = verificationToken;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getExpireAt() {

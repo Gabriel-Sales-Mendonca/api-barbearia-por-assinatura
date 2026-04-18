@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface VerificationSignatureTokenRepository extends JpaRepository<VerificationSignatureToken, Long> {
+public interface VerificationSignatureTokenRepository extends JpaRepository<VerificationSignatureToken, String> {
     void deleteAllByExpireAtBefore(LocalDateTime now);
+    void deleteByUserId(Long userId);
 }

@@ -25,15 +25,18 @@ public class VerificationSignatureTokenService {
         this.userService = userService;
     }
 
+    @Transactional
     public String generateVerificationToken() {
         User user = this.userService.getTokenUser();
+
+        this.verificationSignatureTokenRepository.deleteByUserId(user.getId());
 
         log.info("Gerando token de verificação da assinatura para o usuário: {}", user.getId());
         String verificationToken = this.generateToken();
 
         VerificationSignatureToken verificationSignatureToken = new VerificationSignatureToken(
-                user.getId(),
                 verificationToken,
+                user.getId(),
                 LocalDateTime.now().plusMinutes(5)
         );
 
@@ -44,9 +47,8 @@ public class VerificationSignatureTokenService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 300000) // 5 minutes
+    @Scheduled(fixedRate = 300000) // 5 minutes in milliseconds
     public void deleteExpiredTokens() {
-        log.info("Deletando tokens de verificação de assinatura expirados");
         this.verificationSignatureTokenRepository.deleteAllByExpireAtBefore(LocalDateTime.now());
     }
 
