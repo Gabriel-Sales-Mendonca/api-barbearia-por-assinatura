@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers.exceptions;
 
+import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidOrExpiredTokenException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
@@ -108,6 +109,20 @@ public class ControllerExceptionHandler {
                 Instant.now(),
                 status.value(),
                 "Credential expired",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
+    }
+
+    @ExceptionHandler(InvalidOrExpiredTokenException.class)
+    public ResponseEntity<StandardError> invalidOrExpiredToken(InvalidOrExpiredTokenException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Resource not found",
                 e.getMessage(),
                 request.getRequestURI()
         );

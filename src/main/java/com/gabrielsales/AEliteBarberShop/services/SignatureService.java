@@ -32,6 +32,8 @@ public class SignatureService {
             existingSignature.setAcquisitionDate(acquisitionDate);
             existingSignature.setExpirationDate(expirationDate);
             existingSignature.setPlan(plan);
+            existingSignature.setUserName(user.getName());
+            existingSignature.setUserLastName(user.getLastname());
 
             this.signatureRepository.save(existingSignature);
             return;

@@ -13,6 +13,8 @@ public class Signature {
     private Long id;
     private LocalDate acquisitionDate;
     private LocalDate expirationDate;
+    private String userName;
+    private String userLastName;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -30,6 +32,10 @@ public class Signature {
         this.expirationDate = expirationDate;
         this.user = user;
         this.plan = plan;
+        if (user != null) {
+            this.userName = user.getName();
+            this.userLastName = user.getLastname();
+        }
     }
 
     public Long getId() {
@@ -62,5 +68,21 @@ public class Signature {
 
     public void setPlan(Plan plan) {
         this.plan = plan;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
     }
 }

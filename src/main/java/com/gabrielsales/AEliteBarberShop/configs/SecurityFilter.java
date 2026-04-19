@@ -2,11 +2,14 @@ package com.gabrielsales.AEliteBarberShop.configs;
 
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
+import com.gabrielsales.AEliteBarberShop.services.VerificationSignatureTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +21,7 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(VerificationSignatureTokenService.class);
     private final TokenService tokenService;
     private final UserRepository userRepository;
 
@@ -29,16 +33,12 @@ public class SecurityFilter extends OncePerRequestFilter {
     // Esse método é chamado automaticamente pelo Spring Security, quando a linha de addFilterBefore que possui uma classe que extende OncePerRequestFilter é executada
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("DEBUG: Requisição recebida para URI: " + request.getRequestURI());
+        log.debug("Requisição recebida para URI: {}", request.getRequestURI());
 
         var token = this.recoverToken(request);
         if (token != null) {
             var subject = tokenService.validateToken(token);
             UserDetails user = userRepository.findByLogin(subject);
-
-            System.out.println("Valor de subject: " + subject);
-            System.out.println("Valor de user.getUsername(): " + user.getUsername());
-            System.out.println("Valor de user.getAuthorities(): " + user.getAuthorities());
 
             // Cria o objeto de autenticação do Spring com o usuário e suas permissões
             var authentication = new UsernamePasswordAuthenticationToken(
