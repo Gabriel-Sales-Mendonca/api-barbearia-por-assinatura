@@ -1,27 +1,25 @@
 package com.gabrielsales.AEliteBarberShop.services;
 
-import com.mailersend.sdk.MailerSend;
-import com.mailersend.sdk.MailerSendResponse;
-import com.mailersend.sdk.emails.Email;
-import com.mailersend.sdk.exceptions.MailerSendException;
+import com.gabrielsales.AEliteBarberShop.dtos.out.SendEmailRequestDTO;
+import com.gabrielsales.AEliteBarberShop.dtos.out.SenderOrRecipientDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-
-    @Value("${mailersend.api.token}")
-    private String apiTokenMailersend;
 
     @Value("${mailersend.sender.name}")
     private String senderName;
@@ -29,25 +27,30 @@ public class EmailService {
     @Value("${mailersend.sender.email-address}")
     private String senderEmailAddress;
 
+    private final RestClient mailerSendClient;
+
+    public EmailService(RestClient mailerSendClient) {
+        this.mailerSendClient = mailerSendClient;
+    }
+
     private void sendEmail(String recipientEmail, String recipientName, String subject, String htmlContent, String plainText) {
-        Email email = new Email();
+        SenderOrRecipientDTO from = new SenderOrRecipientDTO(senderName, senderEmailAddress);
+        SenderOrRecipientDTO to = new SenderOrRecipientDTO(recipientName, recipientEmail);
 
-        email.setFrom(senderName, senderEmailAddress);
-        email.addRecipient(recipientName, recipientEmail);
-
-        email.setSubject(subject);
-
-        email.setPlain(plainText);
-        email.setHtml(htmlContent);
-
-        MailerSend ms = new MailerSend();
-
-        ms.setToken(apiTokenMailersend);
+        SendEmailRequestDTO requestBody = new SendEmailRequestDTO(from, List.of(to), subject, plainText, htmlContent);
 
         try {
-            MailerSendResponse response = ms.emails().send(email);
+            mailerSendClient.post()
+                    .uri("/email")
+                    .body(requestBody)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        log.error("Erro na API MailerSend: {} - {}", response.getStatusCode(), response.getStatusText());
+                        throw new RuntimeException("Falha ao enviar email via API");
+                    })
+                    .toBodilessEntity();
             log.info("Email enviado com sucesso");
-        } catch (MailerSendException e) {
+        } catch (Exception e) {
             log.error("Erro ao enviar email para: {}", recipientEmail, e);
             throw new RuntimeException("Falha ao enviar email de verificação", e);
         }
