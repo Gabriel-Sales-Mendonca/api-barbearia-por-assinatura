@@ -4,16 +4,16 @@ import com.gabrielsales.AEliteBarberShop.dtos.out.SendEmailRequestDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.out.SenderOrRecipientDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 @Service
@@ -29,7 +29,7 @@ public class EmailService {
 
     private final RestClient mailerSendClient;
 
-    public EmailService(RestClient mailerSendClient) {
+    public EmailService(@Qualifier("mailerSendClient") RestClient mailerSendClient) {
         this.mailerSendClient = mailerSendClient;
     }
 
@@ -78,8 +78,10 @@ public class EmailService {
     private String loadEmailTemplate(String templateName, String userName, String verificationCode) {
         try {
             ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            Path path = resource.getFile().toPath();
-            String template = Files.readString(path, StandardCharsets.UTF_8);
+            String template = StreamUtils.copyToString(
+                    resource.getInputStream(),
+                    StandardCharsets.UTF_8
+            );
 
             template = template.replace("{{USER_NAME}}", userName);
             template = template.replace("{{VERIFICATION_CODE}}", verificationCode);

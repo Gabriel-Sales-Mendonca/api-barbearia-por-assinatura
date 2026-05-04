@@ -15,7 +15,7 @@ import org.springframework.web.client.RestClient;
 })
 public class MailConfig {
 
-    @Bean
+    @Bean("mailerSendClient")
     public RestClient mailerSendClient(@Value("${mailersend.api.token}") String token) {
         return RestClient.builder()
                 .baseUrl("https://api.mailersend.com/v1")
