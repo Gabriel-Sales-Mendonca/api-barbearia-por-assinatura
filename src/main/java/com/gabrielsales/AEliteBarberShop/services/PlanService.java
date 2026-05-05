@@ -9,9 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class PlanService {
 
@@ -49,7 +46,8 @@ public class PlanService {
         Plan planDB = this.findById(id);
 
         Plan searchedPlan = this.findByName(plan.getName());
-        if (searchedPlan != null) throw new ResourceAlreadyExistsException("Já existe um plano com esse nome.");
+        if (searchedPlan != null && !searchedPlan.getId().equals(id))
+            throw new ResourceAlreadyExistsException("Já existe um plano com esse nome.");
 
         planDB.setName(plan.getName());
         planDB.setDescription(plan.getDescription());
