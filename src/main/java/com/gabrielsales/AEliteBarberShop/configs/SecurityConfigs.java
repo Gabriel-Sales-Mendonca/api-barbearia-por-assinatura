@@ -48,6 +48,11 @@ public class SecurityConfigs {
                         .requestMatchers( "/v3/api-docs/**").permitAll()
                         .requestMatchers( "/swagger-ui/**").permitAll()
                         .requestMatchers( "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/plans").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/plans").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/plans").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/signature-token/validate-verification-signature-token").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/orders/to-approve").hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/orders/approve-or-reject").hasRole(UserRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )
@@ -59,7 +64,8 @@ public class SecurityConfigs {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
