@@ -1,28 +1,31 @@
 package com.gabrielsales.AEliteBarberShop.services;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import com.gabrielsales.AEliteBarberShop.dtos.CloudinaryResponseDTO;
 import com.gabrielsales.AEliteBarberShop.entities.*;
 import com.gabrielsales.AEliteBarberShop.repositories.OrderRepository;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.InvalidResourceException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceAlreadyExistsException;
 import com.gabrielsales.AEliteBarberShop.services.exceptions.ResourceNotFoundException;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Map;
 
 @Service
 public class OrderService {
@@ -32,12 +35,18 @@ public class OrderService {
     private final UserService userService;
     private final PlanService planService;
     private final SignatureService signatureService;
+    private final RestClient cloudinaryClient;
 
-    public OrderService(OrderRepository orderRepository, UserService userService, PlanService planService, SignatureService signatureService) {
+    public OrderService(OrderRepository orderRepository,
+                        UserService userService,
+                        PlanService planService,
+                        SignatureService signatureService,
+                        @Qualifier("cloudinaryClient") RestClient cloudinaryClient) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.planService = planService;
         this.signatureService = signatureService;
+        this.cloudinaryClient = cloudinaryClient;
     }
 
     public Order create(Long planId) {
@@ -124,18 +133,28 @@ public class OrderService {
 
         if (file.isEmpty()) throw new InvalidResourceException("Arquivo enviado está vazio");
 
-        Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_URL"));
-
-        Map params = ObjectUtils.asMap(
-                "signature_algorithm", "sha256",
-                "type", "authenticated",
-                "secure", true);
-
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+            body.add("file", new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            });
+            body.add("type", "authenticated");
+            body.add("signature_algorithm", "sha256");
+
+            CloudinaryResponseDTO response = cloudinaryClient.post()
+                    .uri("/image/upload")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve()
+                    .body(CloudinaryResponseDTO.class);
+
             log.info("Upload de arquivo feito com sucesso para o pedido: {}", order.getId());
-            String secureUrl = uploadResult.get("secure_url").toString().split("authenticated")[1];
+            String fullUrl = response.secureUrl();
+            String secureUrl = fullUrl.split("authenticated")[1];
 
             order.setProofOfPaymentSecureUrl(secureUrl);
             order.setOrderStatus(OrderStatus.AWAITING_PAYMENT_APPROVAL);
