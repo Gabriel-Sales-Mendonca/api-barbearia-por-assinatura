@@ -45,6 +45,9 @@ public class EmailService {
                     .body(requestBody)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                        log.error("Enviado por: {}", senderEmailAddress);
+                        log.error("Detalhes do erro MailerSend: {}", errorBody);
                         log.error("Erro na API MailerSend: {} - {}", response.getStatusCode(), response.getStatusText());
                         throw new RuntimeException("Falha ao enviar email via API");
                     })
