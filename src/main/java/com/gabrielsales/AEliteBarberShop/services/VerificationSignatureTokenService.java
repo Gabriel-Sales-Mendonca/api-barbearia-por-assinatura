@@ -95,7 +95,7 @@ public class VerificationSignatureTokenService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 300000) // 5 minutes in milliseconds
+    @Scheduled(cron = "0 0 8 * * *") // 08:00 AM every day
     public void deleteExpiredTokens() {
         this.verificationSignatureTokenRepository.deleteAllByExpireAtBefore(LocalDateTime.now());
     }
