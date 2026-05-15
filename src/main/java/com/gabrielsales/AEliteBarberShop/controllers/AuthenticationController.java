@@ -3,13 +3,11 @@ package com.gabrielsales.AEliteBarberShop.controllers;
 import com.gabrielsales.AEliteBarberShop.dtos.AuthenticationDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.VerifyEmailDTO;
-import com.gabrielsales.AEliteBarberShop.entities.PendingUser;
 import com.gabrielsales.AEliteBarberShop.entities.User;
 import com.gabrielsales.AEliteBarberShop.mappers.AuthenticationMapper;
 import com.gabrielsales.AEliteBarberShop.repositories.PendingUserRepository;
 import com.gabrielsales.AEliteBarberShop.repositories.UserRepository;
 import com.gabrielsales.AEliteBarberShop.services.AuthenticationService;
-import com.gabrielsales.AEliteBarberShop.services.EmailService;
 import com.gabrielsales.AEliteBarberShop.services.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +17,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -64,6 +60,8 @@ public class AuthenticationController {
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .secure(true)
                 .httpOnly(true)
+                .sameSite("Lax")
+                .domain("aelitebarbershop.com.br")
                 .path("/")
                 .maxAge(604800)
                 .build();
