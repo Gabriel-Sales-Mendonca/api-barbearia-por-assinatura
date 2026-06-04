@@ -76,6 +76,8 @@ public class AuthenticationController {
         ResponseCookie cookie = ResponseCookie.from("token", "")
                 .secure(true)
                 .httpOnly(true)
+                .sameSite("Lax")
+                .domain("aelitebarbershop.com.br")
                 .path("/")
                 .maxAge(0)
                 .build();
