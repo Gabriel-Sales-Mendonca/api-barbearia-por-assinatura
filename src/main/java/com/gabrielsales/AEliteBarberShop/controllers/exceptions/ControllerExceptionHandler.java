@@ -129,4 +129,19 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<StandardError> unauthorized(UnauthorizedException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Unauthorized",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(error);
+    }
+
 }

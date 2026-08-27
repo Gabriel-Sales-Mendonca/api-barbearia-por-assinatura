@@ -1,5 +1,6 @@
 package com.gabrielsales.AEliteBarberShop.controllers;
 
+import com.gabrielsales.AEliteBarberShop.controllers.exceptions.UnauthorizedException;
 import com.gabrielsales.AEliteBarberShop.dtos.AuthenticationDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.RegisterDTO;
 import com.gabrielsales.AEliteBarberShop.dtos.VerifyEmailDTO;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,22 +55,28 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        String token = tokenService.generateToken((User) auth.getPrincipal());
+        try {
+            var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        ResponseCookie cookie = ResponseCookie.from("token", token)
-                .secure(true)
-                .httpOnly(true)
-                .sameSite("Lax")
-                .domain("aelitebarbershop.com.br")
-                .path("/")
-                .maxAge(604800)
-                .build();
+            String token = tokenService.generateToken((User) auth.getPrincipal());
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .secure(true)
+                    .httpOnly(true)
+                    .sameSite("Lax")
+                    .domain("aelitebarbershop.com.br")
+                    .path("/")
+                    .maxAge(604800)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .build();
+        } catch (AuthenticationException e) {
+            log.warn("Email ou Senha incorretos para o login: {}", data.login());
+            throw new UnauthorizedException("Email ou Senha incorretos");
+        }
     }
 
     @PostMapping("/logout")

@@ -86,6 +86,9 @@
 						<tags>
 							<tag>salesgabriel/${project.artifactId}:latest</tag>
 						</tags>
+						<env>
+							<BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--initialize-at-run-time=sun.security.util.Password$ConsoleHolder</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+						</env>
 					</image>
 				</configuration>
 			</plugin>
